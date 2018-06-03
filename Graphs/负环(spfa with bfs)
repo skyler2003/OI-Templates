@@ -1,0 +1,122 @@
+//Author: skyler2003
+//Problem: [BZOJ1715] [Usaco2006 Dec] Wormholes
+//04-06-18 00:30
+//Description: It doesn't pass because of the large data(I used bfs in the function of bfs)
+//If I want to pass it , I must write dfs ...... (I dislike it)
+
+
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define max(a,b) (a>b? a:b)
+#define min(a,b) (a<b? a:b)
+#define FO(x) {freopen(#x".in","r",stdin);freopen(#x".out","w",stdout);}
+#define ONLINE_JUDGE
+#define INF (1<<29)
+
+#pragma GCC Optimize("Ofast")
+#pragma GCC target("sse,sse2,sse3,sse4,popcnt,abm,mmx,avx,tune=native")
+#pragma comment (linker,"/stack:200000000")
+
+typedef long long ll;
+
+bool Finish_read;
+
+template<class T>inline void read(T &x){Finish_read=0;x=0;T f=1;char ch=getchar();while(!isdigit(ch)){if(ch=='-')f=-1;if(ch==EOF)return;ch=getchar();}while(isdigit(ch))x=x*10+ch-'0',ch=getchar();x*=f;Finish_read=1;}
+template<class T>inline void print(T x){if(x/10!=0)print(x/10);putchar(x%10+'0');}
+template<class T>inline void writeln(T x){if(x<0)putchar('-');x=abs(x);print(x);putchar('\n');}
+template<class T>inline void write(T x){if(x<0)putchar('-');x=abs(x);print(x);}
+
+//Template
+
+struct edge{
+    int from, to;
+    int dist;
+    int next;
+};
+
+struct graph{
+    int n, m;
+    ll d[1002];
+    edge e[200001];
+    int first[1002];
+    bool inq[1002];
+    int cnt[1002];
+    int q[2000002];
+    
+	void init(int n) {
+        this->n = n;
+        memset(first, -1, sizeof(int) * 1002);
+        m = 0;
+    }
+    
+    void addedge(int from, int to, int dist) {
+        e[++m] = (edge) {from, to, dist, first[from]};
+        first[from] = m;
+    }
+    
+	bool spfa(int s){
+        //int q[100004];
+        int f = 1, r = 1;
+        memset(d, 0x3f, sizeof(ll) * 1002);
+        memset(inq, 0, sizeof(int) * 1002);
+        memset(cnt, 0, sizeof(int) * 1002);
+        d[s] = 0;
+        q[r] = s;
+        ++r;
+        inq[s] = true;
+        cnt[s] = 1;
+        while (f<r){
+            int u = q[f];
+            ++f;
+            inq[u] = false;
+            int i = first[u];
+            while(i != -1) {
+                ll t = d[u] + e[i].dist;
+                int v = e[i].to;
+                if(d[u] < INF && d[v] > t) {
+                    d[v] = t;
+                    if (!inq[v]) {
+                        q[r] = v;
+                        ++r;
+                        inq[v] = true;
+                        if (++cnt[v] > n) {
+                            return false;
+                        }
+                    }
+                }
+                i = e[i].next;
+            }
+        }
+        return true;
+    }
+} x;
+
+int main() {
+	int T = 0;
+	read(T);
+	for(int tmp = 1; tmp <= T; ++tmp) {
+		int n, m, k;
+		bool fl = false;
+		read(n), read(m), read(k);
+		x.init(n);
+		for(int i = 1; i <= m; ++i) {
+			int u, v, w;
+			read(u), read(v), read(w);
+			x.addedge(u, v, w);
+		}
+		for(int i = 1; i <= k; ++i) {
+			int u, v, w;
+			read(u), read(v), read(w);
+			x.addedge(u, v, -w);
+		}
+		for(int i = 1; i <= n && (!fl); ++i) {
+			if(!x.spfa(i))
+				puts("YES"), fl = true;
+		}
+		if(!fl)
+			puts("NO");
+	}
+	return 0;
+}
